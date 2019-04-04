@@ -5,8 +5,8 @@ from elasticsearch import Elasticsearch
 class Atlas:
 
     def __init__(self, user, password, url, verify_credentials=False, debug=False):
-        self._logger = self._get_logger()
         self._is_debug = debug
+        self._logger = self._get_logger()
 
         self.doc_type = 'credential'
         self.user = user
@@ -149,8 +149,19 @@ class Atlas:
 
 
     def _get_logger(self):
+        if not self._is_debug:
+            # Disable other packages logging to our output debugging
+            es_log = logging.getLogger('elasticsearch')
+            es_log.removeHandler(logging.StreamHandler)
+            es_log.setLevel(logging.CRITICAL)
+
+            urllib3_connectionpool = logging.getLogger('urllib3.connectionpool')
+            urllib3_connectionpool.removeHandler(logging.StreamHandler)
+            urllib3_connectionpool.setLevel(logging.CRITICAL)
+
         logger = logging.getLogger('Atlas')
         logger.setLevel(logging.DEBUG)
         logging.basicConfig(
-            format=logging.basicConfig(format='[%(levelname)s] @ %(asctime)s : %(message)s', level=logging.DEBUG))
+            format=logging.basicConfig(format='[%(levelname)s] : %(name)s @ %(asctime)s : %(message)s',
+                                       level=logging.DEBUG))
         return logger
