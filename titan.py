@@ -14,6 +14,7 @@ parser.add_argument("--email")
 parser.add_argument("--password")
 parser.add_argument("--ip")
 parser.add_argument("--domain")
+parser.add_argument("--domains")
 parser.add_argument("--username")
 parser.add_argument("--debug", default=False)
 
@@ -72,7 +73,17 @@ if args.email:
 	results = atlas.search_email_addresses(email_address=args.email, size=100)
 	pretty_format(results, "per_breach")
 
-# if args.password:
-# 	print("[*] Searching Atlas for emails using the password: %s" % args.password.strip())
-# 	results = atlas.search_passwords(password=args.password, size=100)
-# 	pretty_format(results, "just_emails")	
+if args.domains:
+	domains = args.domains.split(",")
+
+	print("[*] Searching Atlas for %i domains" % len(domains))
+	for domain in domains:
+		domain = '"' + domain + '"'
+		results = atlas.search_email_addresses(email_address=domain, size=100)
+		pretty_format(results, "per_breach")
+
+
+if args.password:
+	print("[*] Searching Atlas for emails using the password: %s" % args.password.strip())
+	results = atlas.search_passwords(password=args.password, size=100)
+	pretty_format(results, "just_emails")	
