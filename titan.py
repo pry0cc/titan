@@ -55,25 +55,11 @@ def pretty_format(results, format_type):
 
 init_atlas(debug=args.debug)
 
-# query_type = ""
-
-# if (not args.email) and (not args.password):
-# 	query_type = "nothing"
-# elif (args.email) and (not args.password):
-# 	query_type = "email_solo"
-# elif (args.email) and (args.password):
-# 	query_type = "email_and_password"
-# elif (not args.email) and (args.password):
-# 	query_type = "password_solo"
-
-# print(query_type)
-
 if args.email:
 	print("[*] Searching Atlas for %s" % args.email.strip())
 	results = atlas.search_email_addresses(email_address=args.email, size=100)
 	pretty_format(results, "per_breach")
-
-if args.domains:
+elif args.domains:
 	domains = args.domains.split(",")
 
 	print("[*] Searching Atlas for %i domains" % len(domains))
@@ -81,9 +67,14 @@ if args.domains:
 		domain = '"' + domain + '"'
 		results = atlas.search_email_addresses(email_address=domain, size=100)
 		pretty_format(results, "per_breach")
-
-
-if args.password:
+elif args.domain:
+	domain = args.domain
+	print("[*] Searching Atlas for %s" % domain)
+	domain = '"' + domain + '"'
+	results = atlas.search_email_addresses(email_address=domain, size=100)
+	pretty_format(results, "per_breach")
+elif args.password:
 	print("[*] Searching Atlas for emails using the password: %s" % args.password.strip())
 	results = atlas.search_passwords(password=args.password, size=100)
-	pretty_format(results, "just_emails")	
+	pretty_format(results, "just_emails")
+
