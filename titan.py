@@ -5,6 +5,7 @@ import json
 import argparse
 import sys
 import crayons
+import os
 
 username = ''
 password = ''
@@ -21,23 +22,34 @@ parser.add_argument("--domains")
 parser.add_argument("--username")
 parser.add_argument("--size")
 parser.add_argument("--output")
+parser.add_argument("--provision")
 parser.add_argument("--debug", default=False)
 
 parser.parse_args()
 args = parser.parse_args()
 
-def load_credentials(file='credentials.json'):
-    global data, username, password, api_url
-    with open(file, 'r') as f:
-        data = json.load(f)
-        username = data['username']
-        password = data['password']
-        api_url = data['api']
+def load_credentials(files=['credentials.json','~/.titan']):
+	global data, username, password, api_url
+	loaded = False
+	for file in files:
+		if os.path.isfile(os.path.expanduser(file)):
+			try:
+				with open(os.path.expanduser(file), 'r') as f:
+					data = json.load(f)
+					username = data['username']
+					password = data['password']
+					api_url = data['api']
+					loaded = True
+			except:
+				print(crayons.red("[-] Something went terribly wrong while attempting to read config, do you have a config?"))
+	if not loaded:
+		print(crayons.red("[-] No config file detected, please make one before proceeding"))
+		sys.exit()
 
 def init_atlas(debug=False):
-    global atlas, username, password, api_url
-    load_credentials()
-    atlas = Atlas(username, password, api_url, verify_credentials=False, debug=debug)
+	global atlas, username, password, api_url
+	load_credentials()
+	atlas = Atlas(username, password, api_url, verify_credentials=False, debug=debug)
 
 
 def format_data(results, format_type):
@@ -53,7 +65,10 @@ def format_data(results, format_type):
 					print("%s: %s" % (key, str(breach_data[key]).strip()))
 	elif format_type == "just_emails":
 		for hit in results["hits"]["hits"]:
-			email = hit["_source"]["emailAddress"]
+			if "emailAddress" in hit["_source"]:
+				email = hit["_source"]["emailAddress"]
+			else:
+				email = hit["_source"]["username"]
 			breach = hit["_index"]
 			print("%s: %s" % (breach, email))
 	elif format_type == "json":
@@ -188,6 +203,7 @@ if args.email:
 		for line in data:
 			f.write(line)
 		f.close()
+		print(crayons.blue("[+] File saved to %s" % (args.output)))
 	else:
 		if args.format:
 			format_data(results, args.format)
@@ -212,6 +228,7 @@ elif args.domains:
 		for line in data:
 			f.write(line)
 		f.close()
+		print(crayons.blue("[+] File saved to %s" % (args.output)))
 	else:
 		if args.format:
 			format_data(results, args.format)
@@ -234,6 +251,7 @@ elif args.domain:
 		for line in data:
 			f.write(line)
 		f.close()
+		print(crayons.blue("[+] File saved to %s" % (args.output)))
 	else:
 		if args.format:
 			format_data(results, args.format)
@@ -254,6 +272,7 @@ elif args.password:
 		for line in data:
 			f.write(line)
 		f.close()
+		print(crayons.blue("[+] File saved to %s" % (args.output)))
 	else:
 		if args.format:
 			format_data(results, args.format)
