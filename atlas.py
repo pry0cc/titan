@@ -159,6 +159,10 @@ class Atlas:
             urllib3_connectionpool.removeHandler(logging.StreamHandler)
             urllib3_connectionpool.setLevel(logging.CRITICAL)
 
+            urllib3_util = logging.getLogger('urllib3.util')
+            urllib3_util.removeHandler(logging.StreamHandler)
+            urllib3_util.setLevel(logging.CRITICAL)
+
         logger = logging.getLogger('Atlas')
         logger.setLevel(logging.DEBUG)
         logging.basicConfig(

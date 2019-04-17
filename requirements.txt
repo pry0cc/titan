@@ -1,3 +1,3 @@
 elasticsearch==5.5.3
 argparse
-certifi
+crayons
